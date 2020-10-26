@@ -21,7 +21,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,7 +35,8 @@ public class Taskactivity extends AppCompatActivity {
    EditText heading,descp;
    static ArrayList<String> ar;
    Map<String,Object> tasks;
-   DatabaseReference ref;
+   DatabaseReference ref,reftask;
+    Timestamp timestamp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,12 +46,16 @@ public class Taskactivity extends AppCompatActivity {
         descp=findViewById(R.id.descid);
         tasks=new HashMap<>();
         ref= FirebaseDatabase.getInstance().getReference("TASKS");
+
         bsend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                  if(!TextUtils.isEmpty(heading.getText().toString()) && !TextUtils.isEmpty(descp.getText().toString())) {
-                     tasks.put(heading.getText().toString(),descp.getText().toString());
-                     ref.updateChildren(tasks).addOnCompleteListener(new OnCompleteListener<Void>() {
+                     Calendar c=Calendar.getInstance();
+                     reftask=ref.child(heading.getText().toString());
+                     tasks.put("desc",descp.getText().toString());
+                     tasks.put("time", c.getTimeInMillis());
+                     reftask.updateChildren(tasks).addOnCompleteListener(new OnCompleteListener<Void>() {
                          @Override
                          public void onComplete(@NonNull Task<Void> task) {
                              if(task.isSuccessful()) {

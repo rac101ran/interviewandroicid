@@ -32,7 +32,10 @@ SharedPreferences pref;
 ArrayList<String> arr,desc;
 TextView numoftasks,selectviewtask;
 DatabaseReference ref;
+String nexttask;
     ArrayAdapter<String> arrayAdapter;
+    long mintimeleft;
+    TextView upcomingtask;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +50,9 @@ DatabaseReference ref;
 
         numoftasks=findViewById(R.id.taskscount);
         selectviewtask=findViewById(R.id.textView3);
+        upcomingtask=findViewById(R.id.upcomingid);
 
+        mintimeleft=Long.MAX_VALUE;
         ref=FirebaseDatabase.getInstance().getReference("TASKS");
         ref.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -59,18 +64,26 @@ DatabaseReference ref;
                            if(!arr.contains(data.getKey().toString())) {
                                //  a check for duplicates
                                arr.add(data.getKey().toString());
-                               desc.add(data.getValue().toString());
+                               desc.add(data.child("desc").getValue().toString());
+                               if(mintimeleft>Long.parseLong(data.child("time").getValue().toString())) {
+                                    mintimeleft=Long.parseLong(data.child("time").getValue().toString());
+                                      nexttask=data.getKey().toString();
+                               }
                            }
 
                     }
+
                     arrayAdapter.notifyDataSetChanged();
+                    upcomingtask.setText(nexttask);
                 }
+
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
 
                 }
             });
+
 
            arrayAdapter= new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, arr);
             list.setAdapter(arrayAdapter);
